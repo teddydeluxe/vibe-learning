@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Was möchtest du heute erstellen? — Workshop-Stationen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16202e;
+    --ink-soft:#3a4654;
+    --paper:#f5f3ee;
+    --card:#ffffff;
+    --line:#dcd8cf;
+    --mono-bg:#1b2533;
+
+    --create:#d98a1f;
+    --cursor:#1f9b86;
+    --heygen:#e0533d;
+    --claude:#7b4fd0;
+    --eleven:#2f6bd8;
+    --grok:#3e8e5a;
+
+    --radius:14px;
+    --shadow:0 1px 0 rgba(22,32,46,.04), 0 12px 30px -18px rgba(22,32,46,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:clamp(24px,5vw,64px) clamp(18px,4vw,32px);}
+
+  /* ---------- shared ---------- */
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  h1,h2,h3{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:-.01em;margin:0;}
+  .view{display:none;animation:fade .4s ease both;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* ---------- door ---------- */
+  .door-head{margin-bottom:clamp(28px,5vw,48px);}
+  .door-head h1{
+    font-size:clamp(34px,6vw,56px);line-height:1.04;margin:14px 0 12px;max-width:18ch;
+  }
+  .door-head p{font-size:18px;color:var(--ink-soft);max-width:58ch;margin:0;}
+
+  .stations{
+    display:grid;gap:18px;
+    grid-template-columns:repeat(3,1fr);
+  }
+  @media(max-width:900px){.stations{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:680px){.stations{grid-template-columns:1fr;}}
+
+  .station{
+    --accent:var(--ink);
+    position:relative;text-align:left;cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px 24px 24px;
+    font:inherit;color:inherit;width:100%;
+    box-shadow:var(--shadow);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .station::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);
+  }
+  .station:hover{transform:translateY(-4px);border-color:var(--accent);
+    box-shadow:0 1px 0 rgba(22,32,46,.04), 0 22px 40px -20px rgba(22,32,46,.5);}
+  .station:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
+  .station .tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;
+    color:var(--accent);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  }
+  .station .tag .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);}
+  .station h2{font-size:22px;margin-bottom:6px;}
+  .station .make{color:var(--ink-soft);font-size:15px;}
+  .station .foot{
+    margin-top:auto;padding-top:18px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  }
+  .station .tool{
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink);
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .station .mbn{
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.04em;
+    color:var(--ink-soft);background:#eeebe3;border:1px solid var(--line);
+    padding:3px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .station .arrow{transition:transform .18s ease;}
+  .station:hover .arrow{transform:translateX(4px);}
+
+  .s-create{--accent:var(--create);}
+  .s-cursor{--accent:var(--cursor);}
+  .s-heygen{--accent:var(--heygen);}
+  .s-claude{--accent:var(--claude);}
+  .s-eleven{--accent:var(--eleven);}
+  .s-grok{--accent:var(--grok);}
+
+  .door-foot{margin-top:34px;font-size:13.5px;color:var(--ink-soft);max-width:70ch;}
+  .door-foot code{font-family:"IBM Plex Mono",monospace;background:#e9e5dc;padding:1px 6px;border-radius:5px;font-size:12.5px;}
+
+  /* ---------- quest ---------- */
+  .back{
+    display:inline-flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;
+    font:inherit;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);
+    padding:6px 0;margin-bottom:26px;letter-spacing:.04em;
+  }
+  .back:hover{color:var(--ink);}
+  .back:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px;}
+
+  .quest-accent{--accent:var(--ink);}
+  .q-tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);display:flex;align-items:center;gap:9px;margin-bottom:16px;
+  }
+  .q-tag .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .quest h1{font-size:clamp(28px,5vw,44px);line-height:1.08;max-width:22ch;margin-bottom:10px;}
+  .quest .lede{font-size:17px;color:var(--ink-soft);max-width:60ch;margin:0 0 6px;}
+  .quest .toolname{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);margin-bottom:6px;}
+  .quest .devices{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-soft);margin:0 0 34px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 24px 22px;margin-bottom:18px;box-shadow:var(--shadow);}
+  .panel h3{font-size:13px;font-family:"IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;}
+
+  ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;}
+  ol.steps li{position:relative;padding:0 0 16px 42px;counter-increment:s;font-size:15.5px;}
+  ol.steps li:last-child{padding-bottom:0;}
+  ol.steps li::before{
+    content:counter(s);position:absolute;left:0;top:-2px;
+    width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .prompt{position:relative;background:var(--mono-bg);border-radius:10px;padding:20px 20px 18px;}
+  .prompt p{font-family:"IBM Plex Mono",monospace;font-size:13.5px;line-height:1.6;color:#e7ecf3;margin:0;white-space:pre-wrap;}
+  .copy{
+    position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);color:#fff;border:none;
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;padding:6px 11px;border-radius:7px;cursor:pointer;
+    transition:background .15s ease;
+  }
+  .copy:hover{background:rgba(255,255,255,.22);}
+  .copy:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+
+  .two{display:grid;gap:18px;grid-template-columns:1fr 1fr;}
+  @media(max-width:680px){.two{grid-template-columns:1fr;}}
+  .example p, .gotcha p{margin:0;font-size:15px;color:var(--ink-soft);}
+  .example p strong, .gotcha p strong{color:var(--ink);font-weight:600;}
+  .gotcha h3{color:var(--heygen);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ EINGANG ============ -->
+  <section id="door" class="view active">
+    <div class="door-head">
+      <div class="eyebrow">Workshop-Stationen · Siemens Stiftung · eine wählen, dort bleiben</div>
+      <h1>Was möchtest du heute erstellen?</h1>
+      <p>Wähle das, womit du am Ende den Raum verlassen möchtest. Jede Station hat zwei MacBook&nbsp;Neos (MBN) mit fertig eingerichtetem Account und Werkzeug — einfach hinsetzen und loslegen.</p>
+    </div>
+
+    <div class="stations" id="stationGrid">
+      <button class="station s-create" data-track="create">
+        <span class="tag"><span class="dot"></span>Station · Co-Creation</span>
+        <h2>Ein internes Tool per Spezifikation bauen</h2>
+        <span class="make">Erst gemeinsam mit KI-Agenten die Spec schreiben, dann bauen lassen — Spec-Driven Development zum Anfassen.</span>
+        <span class="foot"><span class="tool">mit CREATE <span class="arrow">→</span></span><span class="mbn">MBN · Panda 1 &amp; 2</span></span>
+      </button>
+
+      <button class="station s-cursor" data-track="cursor">
+        <span class="tag"><span class="dot"></span>Station · Bauen</span>
+        <h2>Eine Seite beschreiben, beim Entstehen zusehen</h2>
+        <span class="make">Eine Lernseite oder Microsite allein durchs Beschreiben bauen — ohne Programmierkenntnisse.</span>
+        <span class="foot"><span class="tool">mit Cursor <span class="arrow">→</span></span><span class="mbn">MBN · Panda 3 &amp; 4</span></span>
+      </button>
+
+      <button class="station s-heygen" data-track="heygen">
+        <span class="tag"><span class="dot"></span>Station · Erklären</span>
+        <h2>Ein Mensch auf dem Bildschirm</h2>
+        <span class="make">Ein 60-Sekunden-Erklärvideo mit Avatar erstellen — ohne Kamera, ohne Studio.</span>
+        <span class="foot"><span class="tool">mit HeyGen <span class="arrow">→</span></span><span class="mbn">MBN · Panda 5 &amp; 6</span></span>
+      </button>
+
+      <button class="station s-claude" data-track="claude">
+        <span class="tag"><span class="dot"></span>Station · Terminal-Agent</span>
+        <h2>Ein Agent, der im Terminal für dich arbeitet</h2>
+        <span class="make">Aus einem Bericht ein Quiz, eine interaktive Seite oder eine Auswertung machen — nur mit Sprache.</span>
+        <span class="foot"><span class="tool">mit Claude Code (Fable 5) <span class="arrow">→</span></span><span class="mbn">MBN · Panda 7 &amp; 8</span></span>
+      </button>
+
+      <button class="station s-eleven" data-track="eleven">
+        <span class="tag"><span class="dot"></span>Station · Stimme</span>
+        <h2>Texte, die man hören kann</h2>
+        <span class="make">Aus einem kurzen Skript ein natürliches Voiceover machen — auch in mehreren Sprachen.</span>
+        <span class="foot"><span class="tool">mit ElevenLabs <span class="arrow">→</span></span><span class="mbn">MBN · Panda 9 &amp; 10</span></span>
+      </button>
+
+      <button class="station s-grok" data-track="grok">
+        <span class="tag"><span class="dot"></span>Station · Prototyp</span>
+        <h2>Eine App-Idee zum Laufen bringen</h2>
+        <span class="make">Aus einer Idee in Minuten einen klickbaren Prototyp machen — direkt aus der Kommandozeile.</span>
+        <span class="foot"><span class="tool">mit Grok Build CLI <span class="arrow">→</span></span><span class="mbn">MBN · Panda 11 &amp; 12</span></span>
+      </button>
+    </div>
+
+    <p class="door-foot"><strong>MBN = MacBook Neo.</strong> Auf den zwölf Geräten sind die Accounts <code>Panda 1</code> bis <code>Panda 12</code> angelegt — die Nummer am Gerät zeigt dir, zu welcher Station es gehört. Unsicher, wo du starten sollst? <strong>Stimme</strong> und <strong>Erklären</strong> liefern den schnellsten Erfolg; <strong>Co-Creation</strong> und <strong>Terminal-Agent</strong> zeigen am deutlichsten, wie KI-Agenten arbeiten. Auf Panda&nbsp;3 ist zusätzlich <code>git</code> eingerichtet.</p>
+  </section>
+
+  <!-- ============ QUEST ============ -->
+  <section id="quest" class="view quest quest-accent">
+    <button class="back" id="backBtn">← alle Stationen</button>
+    <div class="q-tag"><span class="dot"></span><span id="qStation">Station</span></div>
+    <h1 id="qTitle">Titel</h1>
+    <p class="lede" id="qLede">Einleitung</p>
+    <p class="toolname" id="qTool">Werkzeug</p>
+    <p class="devices" id="qDevices">Geräte</p>
+
+    <div class="panel">
+      <h3>Probier das in 15 Minuten</h3>
+      <ol class="steps" id="qSteps"></ol>
+    </div>
+
+    <div class="panel">
+      <h3>Start-Prompt — kopieren &amp; einfügen</h3>
+      <div class="prompt">
+        <button class="copy" id="copyBtn">kopieren</button>
+        <p id="qPrompt"></p>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="panel example">
+        <h3>Idee für die Siemens Stiftung</h3>
+        <p id="qExample"></p>
+      </div>
+      <div class="panel gotcha">
+        <h3>Achte darauf</h3>
+        <p id="qGotcha"></p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const TRACKS = {
+    create:{
+      accent:"var(--create)", station:"Station · Co-Creation", tool:"Werkzeug: CREATE (internes Tooling, KI-Agenten-Co-Creation)",
+      mbn:"Geräte: MBN Panda 1 & 2 — Account ist angelegt",
+      title:"Ein kleines internes Tool per Spezifikation entstehen lassen",
+      lede:"In CREATE arbeitest du im Spec-Driven-Development-Stil: Du beschreibst zuerst präzise, was ein Tool können soll — dann setzen KI-Agenten es gemeinsam mit dir um. Die Spezifikation ist das Steuer, nicht der Code.",
+      steps:[
+        "Wähle ein kleines, echtes Problem aus deinem Arbeitsalltag — etwas, das heute noch in einer Excel-Liste oder im E-Mail-Postfach lebt.",
+        "Schreibe mit dem Agenten zusammen eine knappe Spec: Wer nutzt das Tool, was geht rein, was kommt raus — und was ist bewusst nicht dabei.",
+        "Lass die Agenten bauen, vergleiche das Ergebnis mit deiner Spec und schärfe die Spec nach, statt am Ergebnis herumzudoktern."
+      ],
+      prompt:`Ich arbeite bei der Siemens Stiftung und möchte ein
+kleines internes Tool bauen: [dein Problem in 1–2 Sätzen].
+
+Hilf mir zuerst, eine knappe Spezifikation zu schreiben:
+Nutzer, Eingaben, Ausgaben, Nicht-Ziele.
+Stell mir dafür maximal 5 Fragen.
+Erst wenn die Spec steht, fangen wir an zu bauen.`,
+      example:"<strong>Zum Beispiel:</strong> ein Mini-Tool, das Experimento-Unterrichtsmaterialien nach Thema und Klassenstufe filtert, ein Sammelformular für Workshop-Feedback mit automatischer Zusammenfassung, oder eine Übersicht der Partnerorganisationen nach Region.",
+      gotcha:"<strong>Die Spec ist das Produkt.</strong> Je klarer Nutzer, Eingaben und Nicht-Ziele formuliert sind, desto besser bauen die Agenten. Lass dich nicht zu früh in Details ziehen — eine vage Spec erzeugt ein vages Tool."
+    },
+    cursor:{
+      accent:"var(--cursor)", station:"Station · Bauen", tool:"Werkzeug: Cursor",
+      mbn:"Geräte: MBN Panda 3 & 4 — auf Panda 3 ist git eingerichtet",
+      title:"Eine Seite beschreiben und beim Entstehen zusehen",
+      lede:"Erstelle eine einfache Lernseite oder Microsite, indem du in einfacher Sprache beschreibst, was du willst — ganz ohne Programmierkenntnisse.",
+      steps:[
+        "Sag in einem Satz, wofür die Seite da ist.",
+        "Bitte um Abschnitte: einen Hero-Bereich, drei Themen-Karten, eine E-Mail-Anmeldung.",
+        "Passe im Gespräch an: „mach den Header grün“, „hier ein Foto einfügen“. Auf Panda 3: Lass dir am Ende zeigen, wie git deine Zwischenstände sichert."
+      ],
+      prompt:`Baue eine einseitige Website für ein Bildungsprogramm
+der Siemens Stiftung.
+
+Mit einem freundlichen Hero-Bereich, drei Themen-Karten
+(z. B. Experimentieren, Lehrkräfte-Fortbildung, Materialien)
+und einer E-Mail-Anmeldung.
+Ruhig, professionell und barrierearm.`,
+      example:"<strong>Zum Beispiel:</strong> eine kleine Landingpage für ein Experimento-Lehrkräftetraining — ein paar Abschnitte, die es erklären, Partner-Logos und ein Anmeldeformular — live gebaut und im Gespräch bearbeitet.",
+      gotcha:"<strong>Ändere immer nur eine Sache</strong>, damit du siehst, was jede Anfrage bewirkt hat. Auf Panda 3 kannst du mit git jeden Zwischenstand sichern und gefahrlos experimentieren."
+    },
+    heygen:{
+      accent:"var(--heygen)", station:"Station · Erklären", tool:"Werkzeug: HeyGen",
+      mbn:"Geräte: MBN Panda 5 & 6 — Account ist angelegt",
+      title:"Ein 60-Sekunden-Erklärvideo mit einer Person erstellen",
+      lede:"Ein Talking-Head-Video, das ein Programm vorstellt — aus einem kurzen Skript, ganz ohne Kamera, Mikrofon oder Studio.",
+      steps:[
+        "Schreibe oder füge ein kurzes Skript ein — ziele auf 5–6 kurze Sätze.",
+        "Wähle einen Avatar und eine Stimme, die zu deinem Ton passen.",
+        "Generiere, dann passe das Tempo an und prüfe die Aussprache."
+      ],
+      prompt:`Schreibe ein Skript für ein 60-Sekunden-Erklärvideo,
+das unser MINT-Bildungsprogramm neuen Partner-Lehrkräften
+vorstellt.
+
+Freundlich und klar. Fünf kurze Sätze.
+Ende mit einem einfachen Handlungsaufruf.`,
+      example:"<strong>Zum Beispiel:</strong> ein Willkommensvideo für neue Experimento-Lehrkräfte in der jeweiligen Landessprache — einmal erstellt und über Regionen hinweg wiederverwendet, indem du einfach Stimme und Sprache tauschst.",
+      gotcha:"<strong>Halte die Sätze kurz.</strong> Avatare stolpern über lange, verschachtelte Sätze — und prüfe genau, wie Namen von Personen, Orten und Programmen ausgesprochen werden."
+    },
+    claude:{
+      accent:"var(--claude)", station:"Station · Terminal-Agent", tool:"Werkzeug: Claude Code (Fable 5)",
+      mbn:"Geräte: MBN Panda 7 & 8 — Account ist angelegt",
+      title:"Einem Agenten zusehen, der im Terminal echte Dateien baut",
+      lede:"Claude Code ist ein KI-Agent, der direkt auf dem Rechner arbeitet: Er legt Dateien an, schreibt Code und baut dir aus deinem Material ein fertiges Ergebnis — du steuerst alles im Gespräch.",
+      steps:[
+        "Öffne das Terminal, wechsle in den Workshop-Ordner und starte mit dem Befehl claude.",
+        "Gib ihm Material — füge Text ein oder lege eine Datei in den Ordner — und sag, was entstehen soll: ein Quiz, eine Mini-Website, eine Auswertung.",
+        "Schau zu, wie er Dateien anlegt, öffne das Ergebnis im Browser und bitte um Änderungen wie in einem Gespräch."
+      ],
+      prompt:`Erstelle aus dem folgenden Programmtext eine kleine
+interaktive Quiz-Seite (eine einzige HTML-Datei) mit
+5 Fragen für Lehrkräfte.
+
+Freundliches, einfaches Design, Auswertung am Ende.
+[hier deinen Text einfügen]`,
+      example:"<strong>Zum Beispiel:</strong> aus einem Experimento-Modul ein Selbsttest-Quiz für Lehrkräfte machen — oder aus einer Tabelle mit Workshop-Feedback eine kurze Auswertung mit Diagramm erzeugen lassen.",
+      gotcha:"<strong>Claude Code arbeitet mit echten Dateien.</strong> Bleib im Workshop-Ordner und lies kurz mit, was er vorschlägt, bevor du bestätigst — genau das ist der Lerneffekt dieser Station."
+    },
+    eleven:{
+      accent:"var(--eleven)", station:"Station · Stimme", tool:"Werkzeug: ElevenLabs",
+      mbn:"Geräte: MBN Panda 9 & 10 — Account ist angelegt",
+      title:"Aus einem kurzen Text ein natürliches Voiceover machen",
+      lede:"Verwandle ein Skript in eine professionell klingende Audiospur — und erzeuge dieselbe Spur in einer zweiten Sprache, ohne Sprecherin und ohne Tonstudio.",
+      steps:[
+        "Nimm einen kurzen Text (5–6 Sätze) — etwa eine Experiment-Anleitung oder ein Programm-Intro — und füge ihn ein.",
+        "Wähle eine Stimme und generiere die Audiospur; probiere eine zweite Stimme zum Vergleich.",
+        "Erzeuge dieselbe Spur in einer weiteren Sprache (z. B. Spanisch) und höre den Unterschied."
+      ],
+      prompt:`Willkommen bei Experimento, dem Bildungsprogramm
+der Siemens Stiftung. In den nächsten Minuten zeigen
+wir dir, wie du mit einfachen Materialien ein Experiment
+zum Thema Energie vorbereitest. Du brauchst kein Labor —
+ein Tisch und Neugier reichen völlig. Lass uns anfangen.`,
+      example:"<strong>Zum Beispiel:</strong> Experiment-Anleitungen als Audio in den Landessprachen der Partnerregionen (etwa Spanisch für Lateinamerika), eine Hörversion des Newsletters oder ein Podcast-Intro für ein Programm.",
+      gotcha:"<strong>Prüfe die Aussprache von Namen und Abkürzungen</strong> („Experimento“, Ortsnamen, MINT) — schreibe sie notfalls lautschriftlich aus. Und klone niemals die Stimme einer echten Person ohne deren ausdrückliche Einwilligung."
+    },
+    grok:{
+      accent:"var(--grok)", station:"Station · Prototyp", tool:"Werkzeug: Grok Build CLI",
+      mbn:"Geräte: MBN Panda 11 & 12 — Account ist angelegt",
+      title:"Eine App-Idee in Minuten zum Laufen bringen",
+      lede:"Mit dem Grok-Build-Agenten machst du aus einer Idee einen klickbaren Prototyp — direkt aus der Kommandozeile, ideal um eine Idee greifbar zu machen, bevor jemand Budget dafür freigibt.",
+      steps:[
+        "Beschreibe die App in einem Satz: Wer nutzt sie und was zeigt sie?",
+        "Lass den Agenten ein erstes Gerüst bauen und öffne es im Browser.",
+        "Iteriere: eine Änderung pro Anfrage, bis sich der Prototyp echt anfühlt."
+      ],
+      prompt:`Baue einen klickbaren Prototyp: eine kleine Web-App,
+in der Lehrkräfte MINT-Experimente nach Thema und
+Klassenstufe filtern können.
+
+Denk dir 10 realistische Beispiel-Experimente aus
+und kennzeichne sie als Beispieldaten.
+Freundliches, klares Design.`,
+      example:"<strong>Zum Beispiel:</strong> eine „Projekt-Landkarte“ der Förderregionen, ein Ideen-Sammler für soziales Unternehmertum (empowering people. Network) oder ein Materialfinder für Lehrkräfte — als Prototyp, den man im nächsten Meeting zeigen kann.",
+      gotcha:"<strong>Prototyp heißt nicht Produkt.</strong> Erfundene Beispieldaten klar als solche kennzeichnen und keine echten Personendaten einfügen — das Ziel ist, die Idee zu zeigen, nicht sie fertig zu bauen."
+    }
+  };
+
+  const door = document.getElementById('door');
+  const quest = document.getElementById('quest');
+
+  function openTrack(key){
+    const t = TRACKS[key];
+    quest.style.setProperty('--accent', t.accent);
+    document.getElementById('qStation').textContent = t.station;
+    document.getElementById('qTitle').textContent = t.title;
+    document.getElementById('qLede').textContent = t.lede;
+    document.getElementById('qTool').textContent = t.tool;
+    document.getElementById('qDevices').textContent = t.mbn;
+    document.getElementById('qPrompt').textContent = t.prompt;
+    document.getElementById('qExample').innerHTML = t.example;
+    document.getElementById('qGotcha').innerHTML = t.gotcha;
+    const ol = document.getElementById('qSteps');
+    ol.innerHTML = '';
+    t.steps.forEach(s=>{const li=document.createElement('li');li.textContent=s;ol.appendChild(li);});
+    door.classList.remove('active');
+    quest.classList.add('active');
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+
+  document.querySelectorAll('.station').forEach(btn=>{
+    btn.addEventListener('click',()=>openTrack(btn.dataset.track));
+  });
+
+  document.getElementById('backBtn').addEventListener('click',()=>{
+    quest.classList.remove('active');
+    door.classList.add('active');
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click',async ()=>{
+    try{
+      await navigator.clipboard.writeText(document.getElementById('qPrompt').textContent);
+      copyBtn.textContent='kopiert ✓';
+      setTimeout(()=>copyBtn.textContent='kopieren',1600);
+    }catch(e){
+      copyBtn.textContent='auswählen & kopieren';
+      setTimeout(()=>copyBtn.textContent='kopieren',1600);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make Something Today — Workshop Stations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16202e;
+    --ink-soft:#3a4654;
+    --paper:#f5f3ee;
+    --card:#ffffff;
+    --line:#dcd8cf;
+    --mono-bg:#1b2533;
+
+    --write:#d98a1f;
+    --explain:#e0533d;
+    --visual:#7b4fd0;
+    --build:#1f9b86;
+
+    --radius:14px;
+    --shadow:0 1px 0 rgba(22,32,46,.04), 0 12px 30px -18px rgba(22,32,46,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:clamp(24px,5vw,64px) clamp(18px,4vw,32px);}
+
+  /* ---------- shared ---------- */
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  h1,h2,h3{font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:-.01em;margin:0;}
+  .view{display:none;animation:fade .4s ease both;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  /* ---------- door ---------- */
+  .door-head{margin-bottom:clamp(28px,5vw,48px);}
+  .door-head h1{
+    font-size:clamp(34px,6vw,56px);line-height:1.04;margin:14px 0 12px;max-width:16ch;
+  }
+  .door-head p{font-size:18px;color:var(--ink-soft);max-width:54ch;margin:0;}
+
+  .stations{
+    display:grid;gap:18px;
+    grid-template-columns:repeat(2,1fr);
+  }
+  @media(max-width:680px){.stations{grid-template-columns:1fr;}}
+
+  .station{
+    --accent:var(--ink);
+    position:relative;text-align:left;cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px 24px 24px;
+    font:inherit;color:inherit;width:100%;
+    box-shadow:var(--shadow);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    overflow:hidden;
+  }
+  .station::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);
+  }
+  .station:hover{transform:translateY(-4px);border-color:var(--accent);
+    box-shadow:0 1px 0 rgba(22,32,46,.04), 0 22px 40px -20px rgba(22,32,46,.5);}
+  .station:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
+  .station .tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;
+    color:var(--accent);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  }
+  .station .tag .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);}
+  .station h2{font-size:23px;margin-bottom:6px;}
+  .station .make{color:var(--ink-soft);font-size:15.5px;}
+  .station .tool{
+    margin-top:18px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink);
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .station .arrow{transition:transform .18s ease;}
+  .station:hover .arrow{transform:translateX(4px);}
+
+  .s-write{--accent:var(--write);}
+  .s-explain{--accent:var(--explain);}
+  .s-visual{--accent:var(--visual);}
+  .s-build{--accent:var(--build);}
+
+  .door-foot{margin-top:34px;font-size:13.5px;color:var(--ink-soft);max-width:62ch;}
+  .door-foot code{font-family:"IBM Plex Mono",monospace;background:#e9e5dc;padding:1px 6px;border-radius:5px;font-size:12.5px;}
+
+  /* ---------- quest ---------- */
+  .back{
+    display:inline-flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;
+    font:inherit;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);
+    padding:6px 0;margin-bottom:26px;letter-spacing:.04em;
+  }
+  .back:hover{color:var(--ink);}
+  .back:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px;}
+
+  .quest-accent{--accent:var(--ink);}
+  .q-tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);display:flex;align-items:center;gap:9px;margin-bottom:16px;
+  }
+  .q-tag .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .quest h1{font-size:clamp(28px,5vw,44px);line-height:1.08;max-width:18ch;margin-bottom:10px;}
+  .quest .lede{font-size:17px;color:var(--ink-soft);max-width:56ch;margin:0 0 6px;}
+  .quest .toolname{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);margin-bottom:34px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 24px 22px;margin-bottom:18px;box-shadow:var(--shadow);}
+  .panel h3{font-size:13px;font-family:"IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;}
+
+  ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;}
+  ol.steps li{position:relative;padding:0 0 16px 42px;counter-increment:s;font-size:15.5px;}
+  ol.steps li:last-child{padding-bottom:0;}
+  ol.steps li::before{
+    content:counter(s);position:absolute;left:0;top:-2px;
+    width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .prompt{position:relative;background:var(--mono-bg);border-radius:10px;padding:20px 20px 18px;}
+  .prompt p{font-family:"IBM Plex Mono",monospace;font-size:13.5px;line-height:1.6;color:#e7ecf3;margin:0;white-space:pre-wrap;}
+  .copy{
+    position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);color:#fff;border:none;
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;padding:6px 11px;border-radius:7px;cursor:pointer;
+    transition:background .15s ease;
+  }
+  .copy:hover{background:rgba(255,255,255,.22);}
+  .copy:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+
+  .two{display:grid;gap:18px;grid-template-columns:1fr 1fr;}
+  @media(max-width:680px){.two{grid-template-columns:1fr;}}
+  .example p, .gotcha p{margin:0;font-size:15px;color:var(--ink-soft);}
+  .example p strong, .gotcha p strong{color:var(--ink);font-weight:600;}
+  .gotcha h3{color:var(--explain);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ FRONT DOOR ============ -->
+  <section id="door" class="view active">
+    <div class="door-head">
+      <div class="eyebrow">Workshop stations · pick one, stay there</div>
+      <h1>What do you want to make today?</h1>
+      <p>Pick the thing you'd like to walk out having made. That decides your station — each one is a single tool and a 15-minute first win.</p>
+    </div>
+
+    <div class="stations" id="stationGrid">
+      <button class="station s-write" data-track="write">
+        <span class="tag"><span class="dot"></span>Station · Write</span>
+        <h2>Words that get read</h2>
+        <span class="make">Turn a long report into a newsletter, captions, or donor copy.</span>
+        <span class="tool">with Claude / ChatGPT <span class="arrow">→</span></span>
+      </button>
+
+      <button class="station s-explain" data-track="explain">
+        <span class="tag"><span class="dot"></span>Station · Explain</span>
+        <h2>A presenter on screen</h2>
+        <span class="make">Make a 60-second explainer video — no camera, no studio.</span>
+        <span class="tool">with HeyGen <span class="arrow">→</span></span>
+      </button>
+
+      <button class="station s-visual" data-track="visual">
+        <span class="tag"><span class="dot"></span>Station · Visuals</span>
+        <h2>Clips &amp; images, fast</h2>
+        <span class="make">Generate short social videos and graphics for a campaign.</span>
+        <span class="tool">with Grok Imagine <span class="arrow">→</span></span>
+      </button>
+
+      <button class="station s-build" data-track="build">
+        <span class="tag"><span class="dot"></span>Station · Build</span>
+        <h2>Describe a page, watch it appear</h2>
+        <span class="make">Build a simple learning page or microsite just by talking.</span>
+        <span class="tool">with Cursor <span class="arrow">→</span></span>
+      </button>
+    </div>
+
+    <p class="door-foot">Not sure? Most people start at <strong>Write</strong> — it's the quickest win and feeds every other station. At an event, this screen lives on signage at the door; each machine then opens straight to its own station below.</p>
+  </section>
+
+  <!-- ============ QUEST ============ -->
+  <section id="quest" class="view quest quest-accent">
+    <button class="back" id="backBtn">← all stations</button>
+    <div class="q-tag"><span class="dot"></span><span id="qStation">Station</span></div>
+    <h1 id="qTitle">Title</h1>
+    <p class="lede" id="qLede">Lede</p>
+    <p class="toolname" id="qTool">tool</p>
+
+    <div class="panel">
+      <h3>Try this in 15 minutes</h3>
+      <ol class="steps" id="qSteps"></ol>
+    </div>
+
+    <div class="panel">
+      <h3>Starter prompt — copy &amp; paste</h3>
+      <div class="prompt">
+        <button class="copy" id="copyBtn">copy</button>
+        <p id="qPrompt"></p>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="panel example">
+        <h3>NGO example</h3>
+        <p id="qExample"></p>
+      </div>
+      <div class="panel gotcha">
+        <h3>Watch out for</h3>
+        <p id="qGotcha"></p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const TRACKS = {
+    write:{
+      accent:"var(--write)", station:"Station · Write", tool:"Tool: Claude or ChatGPT",
+      title:"Turn a long report into content people read",
+      lede:"Take something you already have — a program report, a project update — and reshape it into the formats your audience actually opens.",
+      steps:[
+        "Paste your source text, or describe the project in a few sentences.",
+        "Ask for one specific format: a 120-word newsletter item, 5 social captions, or a donor thank-you.",
+        "Refine by talking: “make it warmer,” “shorter,” “rewrite for LinkedIn.”"
+      ],
+      prompt:`You are the communications lead for an education NGO.
+Here is a two-page summary of our STEM teacher-training program:
+[paste your text here]
+
+Write a 120-word newsletter item and 3 LinkedIn captions.
+Warm and concrete, plain language, no jargon.`,
+      example:"<strong>Siemens Stiftung angle:</strong> drop in a dense Experimento program report and ask for a short funder update plus a set of social posts highlighting one teacher's story.",
+      gotcha:"<strong>It can invent figures and names.</strong> Check every number, quote, and proper noun against your source before anything goes out."
+    },
+    explain:{
+      accent:"var(--explain)", station:"Station · Explain", tool:"Tool: HeyGen",
+      title:"Make a 60-second explainer with a presenter",
+      lede:"A talking-head video that introduces a program — built from a short script, with no camera, microphone, or studio needed.",
+      steps:[
+        "Write or paste a short script — aim for 5–6 short sentences.",
+        "Choose an avatar and a voice that fit your tone.",
+        "Generate, then adjust pacing and re-check pronunciations."
+      ],
+      prompt:`Write a script for a 60-second explainer video
+introducing our clean-water program to new volunteers.
+
+Friendly and clear. Five short sentences.
+End with one simple call to action.`,
+      example:"<strong>Siemens Stiftung angle:</strong> a welcome video for new partner teachers, in the local language, that you can reuse across regions by swapping the voice.",
+      gotcha:"<strong>Keep sentences short.</strong> Avatars stumble on long, clause-heavy lines, and double-check how names of people and places are pronounced."
+    },
+    visual:{
+      accent:"var(--visual)", station:"Station · Visuals", tool:"Tool: Grok Imagine",
+      title:"Make social clips and graphics in minutes",
+      lede:"Generate short video clips and images for a campaign — from a single line describing the shot you want.",
+      steps:[
+        "Describe one shot: subject + action + mood + light.",
+        "Generate an image you like, then animate it into a short clip.",
+        "Make 2–3 variations so you can pick or A/B test."
+      ],
+      prompt:`A bright, hopeful 6-second clip:
+children planting seedlings in a school garden,
+soft morning light, gentle camera push-in,
+warm documentary style.`,
+      example:"<strong>Siemens Stiftung angle:</strong> b-roll-style clips and header graphics for a campaign around a science-education program, sized for Instagram and LinkedIn.",
+      gotcha:"<strong>Clips are short (≤10s) and hands/text can come out wrong.</strong> Regenerate rather than fight a bad result — and don't depict identifiable real people."
+    },
+    build:{
+      accent:"var(--build)", station:"Station · Build", tool:"Tool: Cursor",
+      title:"Describe a page out loud and watch it get built",
+      lede:"Make a simple learning page or microsite by describing what you want in plain language — no code knowledge needed.",
+      steps:[
+        "Say what the page is for, in one sentence.",
+        "Ask for sections: a hero, three topic cards, an email signup.",
+        "Tweak by talking: “make the header green,” “add a photo here.”"
+      ],
+      prompt:`Build a one-page site for a workshop that teaches
+NGO staff to create content with AI.
+
+Include a friendly hero, three topic cards
+(writing, video, graphics), and an email signup.
+Calm, professional, and accessible.`,
+      example:"<strong>Siemens Stiftung angle:</strong> a small landing page for a program — a few sections explaining it, partner logos, and a sign-up form — built and edited live.",
+      gotcha:"<strong>Change one thing at a time</strong> so you can see what each request did, and save your work often."
+    }
+  };
+
+  const door = document.getElementById('door');
+  const quest = document.getElementById('quest');
+
+  function openTrack(key){
+    const t = TRACKS[key];
+    quest.style.setProperty('--accent', t.accent);
+    document.getElementById('qStation').textContent = t.station;
+    document.getElementById('qTitle').textContent = t.title;
+    document.getElementById('qLede').textContent = t.lede;
+    document.getElementById('qTool').textContent = t.tool;
+    document.getElementById('qPrompt').textContent = t.prompt;
+    document.getElementById('qExample').innerHTML = t.example;
+    document.getElementById('qGotcha').innerHTML = t.gotcha;
+    const ol = document.getElementById('qSteps');
+    ol.innerHTML = '';
+    t.steps.forEach(s=>{const li=document.createElement('li');li.textContent=s;ol.appendChild(li);});
+    door.classList.remove('active');
+    quest.classList.add('active');
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+
+  document.querySelectorAll('.station').forEach(btn=>{
+    btn.addEventListener('click',()=>openTrack(btn.dataset.track));
+  });
+
+  document.getElementById('backBtn').addEventListener('click',()=>{
+    quest.classList.remove('active');
+    door.classList.add('active');
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click',async ()=>{
+    try{
+      await navigator.clipboard.writeText(document.getElementById('qPrompt').textContent);
+      copyBtn.textContent='copied ✓';
+      setTimeout(()=>copyBtn.textContent='copy',1600);
+    }catch(e){
+      copyBtn.textContent='select & copy';
+      setTimeout(()=>copyBtn.textContent='copy',1600);
+    }
+  });
+</script>
+</body>
+</html>
